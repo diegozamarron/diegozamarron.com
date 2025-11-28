@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diego Zamarron - Portfolio</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <h2 class="logo">DZ</h2>
+            <div class="nav-links">
+                <button class="nav-btn active" data-section="home">home</button>
+                <button class="nav-btn" data-section="projects">projects</button>
+                <button class="nav-btn" data-section="about">about</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Home Section -->
+        <section id="home" class="section active">
+            <div class="hero">
+                <h1 class="title">Diego Zamarron</h1>
+                <p class="subtitle">High school senior, programmer, musician</p>
+                <p class="description">
+                    I enjoy coding and the algorithms that go into it. When I'm not programming, 
+                    you'll find me making music on one of my many instruments.
+                </p>
+            </div>
+
+            <div class="button-group">
+                <a href="https://github.com/diegozamarron" target="_blank" class="btn btn-primary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                    </svg>
+                    GitHub
+                </a>
+                <button class="btn btn-secondary" onclick="showSection('projects')">View Projects</button>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects" class="section">
+            <div class="section-header">
+                <h2 class="section-title">Projects</h2>
+                <p class="section-description">Things I've built</p>
+            </div>
+
+            <div class="project-card" onclick="showCalculator()">
+                <div class="project-content">
+                    <div>
+                        <h3 class="project-title">PVC Flute Calculator</h3>
+                        <p class="project-description">
+                            A calculator that figures out the measurements for making PVC flutes. 
+                            Calculates hole distances and pipe length based on desired pitch and scale.
+                        </p>
+                        <p class="project-hint">Click to try it out →</p>
+                    </div>
+                    <svg class="project-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="16 18 22 12 16 6"></polyline>
+                        <polyline points="8 6 2 12 8 18"></polyline>
+                    </svg>
+                </div>
+                <div class="project-tags">
+                    <span class="tag">Python</span>
+                </div>
+            </div>
+
+            <div class="project-card placeholder">
+                <p>More projects coming soon...</p>
+            </div>
+        </section>
+
+        <!-- Calculator Section -->
+        <section id="calculator" class="section">
+            <button class="back-btn" onclick="hideCalculator()">← Back to Projects</button>
+            
+            <div class="calculator-container">
+                <h2 class="calculator-title">🎵 PVC Flute Calculator</h2>
+                
+                <div class="form-group">
+                    <label class="form-label">Select your tuning system:</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="tuning" value="ET" checked>
+                            <span>Equal Temperament</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="tuning" value="JI">
+                            <span>Just Intonation</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Select your scale:</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="scale" value="Major" checked>
+                            <span>Major</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="scale" value="Minor">
+                            <span>Minor</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="fundamental" class="form-label">Type your fundamental pitch (Hz):</label>
+                    <input type="number" id="fundamental" value="440" step="0.01" class="input-field">
+                </div>
+
+                <button onclick="calculate()" class="btn btn-calculate">Calculate</button>
+
+                <div id="results" class="results"></div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="section">
+            <div class="section-header">
+                <h2 class="section-title">About Me</h2>
+            </div>
+
+            <div class="about-content">
+                <p class="about-text">
+                    I'm a high school senior who loves the logic and creativity that comes with programming. 
+                    There's something satisfying about breaking down complex problems into elegant algorithms.
+                </p>
+                <p class="about-text">
+                    Music is my other passion. I play organ, piano, viola, flute, clarinet, and sing bass in choir. 
+                    The intersection of music and programming is where some of my favorite projects live—like my 
+                    PVC flute calculator that combines both worlds.
+                </p>
+            </div>
+
+            <div class="skills-section">
+                <h3 class="skills-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="16 18 22 12 16 6"></polyline>
+                        <polyline points="8 6 2 12 8 18"></polyline>
+                    </svg>
+                    Technical Skills
+                </h3>
+                <div class="skills-grid">
+                    <span class="skill-tag primary">Python</span>
+                    <span class="skill-tag primary">Java</span>
+                    <span class="skill-tag primary">Node.js</span>
+                    <span class="skill-tag primary">React</span>
+                </div>
+            </div>
+
+            <div class="skills-section">
+                <h3 class="skills-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 18V5l12-2v13"></path>
+                        <circle cx="6" cy="18" r="3"></circle>
+                        <circle cx="18" cy="16" r="3"></circle>
+                    </svg>
+                    Instruments
+                </h3>
+                <div class="skills-grid">
+                    <span class="skill-tag">Organ</span>
+                    <span class="skill-tag">Piano</span>
+                    <span class="skill-tag">Viola</span>
+                    <span class="skill-tag">Flute</span>
+                    <span class="skill-tag">Clarinet</span>
+                    <span class="skill-tag">Choir (Bass)</span>
+                </div>
+            </div>
+
+            <div class="contact-section">
+                <h3 class="contact-title">Get in Touch</h3>
+                <a href="https://github.com/diegozamarron" target="_blank" class="contact-link">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                    </svg>
+                    GitHub
+                </a>
+            </div>
+        </section>
+    </div>
+
+    <script src="calculator.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
