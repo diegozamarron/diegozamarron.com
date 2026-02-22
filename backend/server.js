@@ -12,16 +12,21 @@ const APCA_API_BASE_URL = (process.env.APCA_API_BASE_URL || "https://paper-api.a
 const GITHUB_REPO = (process.env.GITHUB_REPO || "diegozamarron/MidasBot").trim();
 const GITHUB_BRANCH = (process.env.GITHUB_BRANCH || "main").trim();
 const GITHUB_DASHBOARD_JSON_PATH = (process.env.GITHUB_DASHBOARD_JSON_PATH || "dashboard/latest.json").trim();
-const GITHUB_AGG_CSV_PATH = (process.env.GITHUB_AGG_CSV_PATH || "truthsocial_daily_aggregated.csv").trim();
 
 const rawBase = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}`;
 const githubDashboardUrl = `${rawBase}/${GITHUB_DASHBOARD_JSON_PATH}`;
-const githubAggCsvUrl = `${rawBase}/${GITHUB_AGG_CSV_PATH}`;
 
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || "https://diegozamarron.com,https://www.diegozamarron.com,http://localhost:5173,http://localhost:3000")
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
+
+app.use((req, _res, next) => {
+  const started = Date.now();
+  req._startedAt = started;
+  console.log(`[REQ] ${req.method} ${req.path}`);
+  next();
+});
 
 app.use(
   cors({
@@ -34,6 +39,14 @@ app.use(
     },
   })
 );
+
+app.use((req, res, next) => {
+  res.on("finish", () => {
+    const ms = Date.now() - (req._startedAt || Date.now());
+    console.log(`[RES] ${req.method} ${req.path} -> ${res.statusCode} (${ms}ms)`);
+  });
+  next();
+});
 
 function ensureAlpacaConfigured() {
   if (!APCA_API_KEY_ID || !APCA_API_SECRET_KEY) {
@@ -55,13 +68,22 @@ async function alpacaRequest(path, searchParams = null) {
     });
   }
 
-  const res = await fetch(url, {
-    headers: {
-      "APCA-API-KEY-ID": APCA_API_KEY_ID,
-      "APCA-API-SECRET-KEY": APCA_API_SECRET_KEY,
-      Accept: "application/json",
-    },
-  });
+  console.log(`[UPSTREAM] Alpaca -> ${url.toString()}`);
+
+  let res;
+  try {
+    res = await fetch(url, {
+      headers: {
+        "APCA-API-KEY-ID": APCA_API_KEY_ID,
+        "APCA-API-SECRET-KEY": APCA_API_SECRET_KEY,
+        Accept: "application/json",
+      },
+    });
+  } catch (e) {
+    const err = new Error(`Alpaca network fetch failed: ${e?.message || "unknown"}`);
+    err.status = 502;
+    throw err;
+  }
 
   const text = await res.text();
   let data;
@@ -77,10 +99,12 @@ async function alpacaRequest(path, searchParams = null) {
     err.payload = data;
     throw err;
   }
+
   return data;
 }
 
 async function fetchJson(url) {
+  console.log(`[UPSTREAM] GitHub -> ${url}`);
   const res = await fetch(url, { headers: { Accept: "application/json" } });
   if (!res.ok) {
     const err = new Error(`GitHub JSON fetch failed: ${res.status}`);
@@ -88,57 +112,6 @@ async function fetchJson(url) {
     throw err;
   }
   return res.json();
-}
-
-async function fetchText(url) {
-  const res = await fetch(url);
-  if (!res.ok) {
-    const err = new Error(`GitHub text fetch failed: ${res.status}`);
-    err.status = res.status;
-    throw err;
-  }
-  return res.text();
-}
-
-function parseSimpleCsv(csvText) {
-  const lines = csvText
-    .split(/\r?\n/)
-    .map((l) => l.trim())
-    .filter(Boolean);
-
-  if (lines.length < 2) return [];
-  const headers = lines[0].split(",").map((h) => h.trim());
-  return lines.slice(1).map((line) => {
-    const cols = line.split(",").map((c) => c.trim());
-    const row = {};
-    headers.forEach((h, i) => {
-      row[h] = cols[i] ?? "";
-    });
-    return row;
-  });
-}
-
-function computePicksFromAggregated(rows) {
-  if (!rows.length) return { best: null, worst: null, rows: [] };
-
-  const normalized = rows
-    .map((r) => ({
-      ticker: r.Ticker,
-      mean: Number(r.MeanSentimentScore),
-      mentions: Number(r.Mentions),
-    }))
-    .filter((r) => r.ticker && Number.isFinite(r.mean) && Number.isFinite(r.mentions));
-
-  if (!normalized.length) return { best: null, worst: null, rows: [] };
-
-  let best = normalized[0];
-  let worst = normalized[0];
-  for (const row of normalized) {
-    if (row.mean > best.mean) best = row;
-    if (row.mean < worst.mean) worst = row;
-  }
-
-  return { best, worst, rows: normalized };
 }
 
 async function getPicksAndTree() {
@@ -150,20 +123,16 @@ async function getPicksAndTree() {
       tree: snapshot.persistent_tree || null,
       sentimentRows: snapshot.sentiment_rows || [],
       asOf: snapshot.as_of || null,
+      warning: null,
     };
-  } catch {
-    const csv = await fetchText(githubAggCsvUrl);
-    const rows = parseSimpleCsv(csv);
-    const picks = computePicksFromAggregated(rows);
+  } catch (e) {
     return {
-      source: "github_aggregated_csv",
-      picks: {
-        best: picks.best,
-        worst: picks.worst,
-      },
+      source: "none",
+      picks: null,
       tree: null,
-      sentimentRows: picks.rows,
+      sentimentRows: [],
       asOf: null,
+      warning: `No GitHub snapshot available: ${e?.message || "unknown"}`,
     };
   }
 }
@@ -191,6 +160,13 @@ function buildHistorySeries(raw) {
   });
 }
 
+function unwrapSettled(result, key) {
+  if (result.status === "fulfilled") {
+    return { value: result.value, error: null };
+  }
+  return { value: null, error: `${key}: ${result.reason?.message || "failed"}` };
+}
+
 app.get("/health", (_req, res) => {
   res.json({ ok: true, service: "midas-api" });
 });
@@ -202,16 +178,7 @@ app.get("/api/account", async (_req, res, next) => {
     const lastEquity = Number(account.last_equity || 0);
     const winLossUsd = equity - lastEquity;
     const winLossPct = lastEquity !== 0 ? (winLossUsd / lastEquity) * 100 : 0;
-
-    res.json({
-      account,
-      summary: {
-        equity,
-        lastEquity,
-        winLossUsd,
-        winLossPct,
-      },
-    });
+    res.json({ account, summary: { equity, lastEquity, winLossUsd, winLossPct } });
   } catch (err) {
     next(err);
   }
@@ -254,92 +221,83 @@ app.get("/api/portfolio-history", async (req, res, next) => {
       extended_hours: "false",
     });
 
-    const series = buildHistorySeries(raw);
-    res.json({ raw, series });
+    res.json({ raw, series: buildHistorySeries(raw) });
   } catch (err) {
     next(err);
   }
 });
 
-app.get("/api/picks", async (_req, res, next) => {
-  try {
-    const data = await getPicksAndTree();
-    res.json({
-      source: data.source,
-      asOf: data.asOf,
-      latestPicks: data.picks,
-      sentimentRows: data.sentimentRows,
-    });
-  } catch (err) {
-    next(err);
-  }
+app.get("/api/picks", async (_req, res) => {
+  const data = await getPicksAndTree();
+  res.json({
+    source: data.source,
+    asOf: data.asOf,
+    latestPicks: data.picks,
+    sentimentRows: data.sentimentRows,
+    warning: data.warning,
+  });
 });
 
-app.get("/api/tree", async (_req, res, next) => {
-  try {
-    const data = await getPicksAndTree();
-    res.json({
-      source: data.source,
-      asOf: data.asOf,
-      persistentTree: data.tree,
-      note: data.tree ? undefined : "No persistent_tree found. Add dashboard/latest.json in MidasBot repo.",
-    });
-  } catch (err) {
-    next(err);
-  }
+app.get("/api/tree", async (_req, res) => {
+  const data = await getPicksAndTree();
+  res.json({
+    source: data.source,
+    asOf: data.asOf,
+    persistentTree: data.tree,
+    warning: data.warning || (data.tree ? null : "No persistent_tree found in snapshot."),
+  });
 });
 
-app.get("/api/dashboard", async (_req, res, next) => {
-  try {
-    const [account, positions, activity, history, picksTree] = await Promise.all([
-      alpacaRequest("/v2/account"),
-      alpacaRequest("/v2/positions"),
-      alpacaRequest("/v2/account/activities", {
-        activity_types: "FILL",
-        direction: "desc",
-        page_size: 20,
-      }),
-      alpacaRequest("/v2/account/portfolio/history", {
-        period: "1M",
-        timeframe: "1D",
-        intraday_reporting: "market_hours",
-        pnl_reset: "per_day",
-        extended_hours: "false",
-      }),
-      getPicksAndTree(),
-    ]);
+app.get("/api/dashboard", async (_req, res) => {
+  const settled = await Promise.allSettled([
+    alpacaRequest("/v2/account"),
+    alpacaRequest("/v2/positions"),
+    alpacaRequest("/v2/account/activities", { activity_types: "FILL", direction: "desc", page_size: 20 }),
+    alpacaRequest("/v2/account/portfolio/history", {
+      period: "1M",
+      timeframe: "1D",
+      intraday_reporting: "market_hours",
+      pnl_reset: "per_day",
+      extended_hours: "false",
+    }),
+    getPicksAndTree(),
+  ]);
 
-    const equity = Number(account.equity || 0);
-    const lastEquity = Number(account.last_equity || 0);
-    const winLossUsd = equity - lastEquity;
-    const winLossPct = lastEquity !== 0 ? (winLossUsd / lastEquity) * 100 : 0;
+  const accountR = unwrapSettled(settled[0], "account");
+  const positionsR = unwrapSettled(settled[1], "positions");
+  const activityR = unwrapSettled(settled[2], "activity");
+  const historyR = unwrapSettled(settled[3], "history");
+  const picksR = unwrapSettled(settled[4], "picks");
 
-    res.json({
-      asOf: new Date().toISOString(),
-      source: {
-        alpacaBaseUrl: APCA_API_BASE_URL,
-        picksSource: picksTree.source,
-      },
-      summary: {
-        equity,
-        lastEquity,
-        winLossUsd,
-        winLossPct,
-      },
-      latestPicks: picksTree.picks,
-      positions,
-      recentActivity: activity,
-      historySeries: buildHistorySeries(history),
-      persistentTree: picksTree.tree,
-      sentimentRows: picksTree.sentimentRows,
-    });
-  } catch (err) {
-    next(err);
-  }
+  const account = accountR.value || {};
+  const equity = Number(account.equity || 0);
+  const lastEquity = Number(account.last_equity || 0);
+  const winLossUsd = equity - lastEquity;
+  const winLossPct = lastEquity !== 0 ? (winLossUsd / lastEquity) * 100 : 0;
+
+  const warnings = [accountR.error, positionsR.error, activityR.error, historyR.error, picksR.error]
+    .filter(Boolean);
+
+  res.json({
+    asOf: new Date().toISOString(),
+    source: {
+      alpacaBaseUrl: APCA_API_BASE_URL,
+      picksSource: picksR.value?.source || "none",
+    },
+    summary: { equity, lastEquity, winLossUsd, winLossPct },
+    latestPicks: picksR.value?.picks || null,
+    positions: positionsR.value || [],
+    recentActivity: activityR.value || [],
+    historySeries: historyR.value ? buildHistorySeries(historyR.value) : [],
+    persistentTree: picksR.value?.tree || null,
+    sentimentRows: picksR.value?.sentimentRows || [],
+    warnings,
+  });
 });
 
 app.use((err, _req, res, _next) => {
   const status = Number(err.status || 500);
+  console.error("[ERROR]", err.message, err.payload || "");
   res.status(status).json({
     error: err.message || "Internal server error",
     details: err.payload || undefined,
