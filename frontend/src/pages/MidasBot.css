@@ -4,10 +4,9 @@
 }
 
 .midas-wrap {
-  margin-left: 15rem;
-  margin-right: 4rem;
-  margin-top: 2rem;
-  padding-bottom: 3rem;
+  max-width: 1200px;
+  margin: 2rem auto 0 auto;
+  padding: 0 1.5rem 3rem 1.5rem;
 }
 
 .midas-grid {
@@ -29,6 +28,7 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
   padding: 1rem;
+  text-align: center;
 }
 
 .midas-card h3 {
@@ -62,7 +62,7 @@
 
 .pick-row {
   display: grid;
-  grid-template-columns: 6rem 1fr 1fr 1fr;
+  grid-template-columns: 8.8rem 1fr 1fr 1fr;
   color: var(--text-muted);
   padding: 0.4rem 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
@@ -214,8 +214,8 @@
   }
 
   .midas-wrap {
-    margin-left: 1rem;
-    margin-right: 1rem;
+    margin: 1rem auto 0 auto;
+    padding: 0 1rem 2rem 1rem;
   }
 
   .midas-grid.four,
@@ -224,7 +224,7 @@
   }
 
   .pick-row {
-    grid-template-columns: 5.5rem 1fr 1fr;
+    grid-template-columns: 7.2rem 1fr 1fr;
     gap: 0.35rem;
   }
 
@@ -240,11 +240,23 @@
   }
 
   .midas-wrap {
-    margin-left: 3rem;
-    margin-right: 3rem;
+    margin: 1.5rem auto 0 auto;
+    padding: 0 2rem 2.5rem 2rem;
   }
 
   .midas-grid.four {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+
+.chart-shell,
+.tree-shell,
+.table-wrap {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.midas-header-row {
+  justify-content: center;
+  flex-wrap: wrap;
 }

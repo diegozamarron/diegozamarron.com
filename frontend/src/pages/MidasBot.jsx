@@ -248,10 +248,7 @@ export default function MidasBot() {
         <h1 className="title">MidasBot</h1>
         <p className="subtitle">Live trading dashboard</p>
         <p className="description">
-          Positions, picks, account performance, recent fills, and persistent sentiment tree.
-        </p>
-        <p className="description">
-          Baseline for P/L: {formatCurrency(STARTING_BASELINE)}
+          A golden touch, with a trump card.
         </p>
       </section>
 
