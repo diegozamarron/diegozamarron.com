@@ -6,6 +6,8 @@ const API_BASE =
   import.meta.env.VITE_MIDAS_API_BASE ||
   (window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://api.diegozamarron.com');
 
+const STARTING_BASELINE = Number(import.meta.env.VITE_MIDAS_BASELINE || 1000000);
+
 function toNumber(value) {
   const n = Number(value);
   return Number.isFinite(n) ? n : null;
@@ -222,6 +224,15 @@ export default function MidasBot() {
       : toNumber(historySeries[historySeries.length - 1]?.dailyReturnPct)
     : null;
 
+  const latestEquityFromHistory = historySeries.length
+    ? toNumber(historySeries[historySeries.length - 1]?.equity)
+    : null;
+
+  const equityNow = toNumber(summary.equity) ?? latestEquityFromHistory;
+  const baseline = Number.isFinite(STARTING_BASELINE) && STARTING_BASELINE > 0 ? STARTING_BASELINE : 1000000;
+  const baselineWinLossUsd = equityNow === null ? null : equityNow - baseline;
+  const baselineWinLossPct = baselineWinLossUsd === null ? null : (baselineWinLossUsd / baseline) * 100;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -235,6 +246,9 @@ export default function MidasBot() {
         <p className="description">
           Positions, picks, account performance, recent fills, and persistent sentiment tree.
         </p>
+        <p className="description">
+          Baseline for P/L: {formatCurrency(STARTING_BASELINE)}
+        </p>
       </section>
 
       <section className="midas-wrap">
@@ -246,15 +260,15 @@ export default function MidasBot() {
             <div className="midas-grid four">
               <article className="midas-card">
                 <h3>Equity</h3>
-                <p className="midas-value">{formatCurrency(summary.equity)}</p>
+                <p className="midas-value">{formatCurrency(equityNow)}</p>
               </article>
               <article className="midas-card">
-                <h3>Win/Loss $</h3>
-                <p className="midas-value">{formatCurrency(summary.winLossUsd)}</p>
+                <h3>Win/Loss $ (Since Start)</h3>
+                <p className="midas-value">{formatCurrency(baselineWinLossUsd)}</p>
               </article>
               <article className="midas-card">
-                <h3>Win/Loss %</h3>
-                <p className="midas-value">{formatPercent(summary.winLossPct)}</p>
+                <h3>Win/Loss % (Since Start)</h3>
+                <p className="midas-value">{formatPercent(baselineWinLossPct)}</p>
               </article>
               <article className="midas-card">
                 <h3>As Of</h3>
