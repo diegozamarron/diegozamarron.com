@@ -1,0 +1,101 @@
+.introduction {
+  margin-top: 5rem;
+  margin-left: 15rem;
+  padding: -5rem;
+}
+.title {
+  color:var(--text);
+  margin-bottom: 0.5rem;
+  font-size: 4rem;
+}
+
+.subtitle {
+  margin:0;
+  color:var(--text-hover);
+  font-size: 1.5rem;
+
+}
+
+.projects{
+    display: flex;
+    flex-direction: row;
+    margin-top: 2rem;
+    margin-left: 15rem;
+    gap: 15rem;
+    width: 100%;
+}
+
+.coding-projects{
+    color: var(text);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 25%;
+
+}
+.music-projects{
+    color: var(text);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 25%;
+}
+
+/* Small devices (phones/tablets) */
+@media (max-width: 767px) {
+  .introduction {
+    margin-left: 1rem;  /* override huge desktop margin */
+    margin-right: 1rem;
+    padding: 0;         /* remove negative padding */
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .projects {
+    flex-direction: column; /* stack coding/music projects */
+    margin-left: 1rem;      /* override desktop margin */
+    margin-right: 1rem;
+    gap: 2rem;               /* smaller gap between sections */
+  }
+
+  .coding-projects,
+  .music-projects {
+    width: 92%;             /* full width on mobile */
+    gap: 0.8rem;             /* reduce gap between cards */
+  }
+}
+/* Medium devices (tablets, iPad) */
+@media (min-width: 768px) and (max-width: 1366px) {
+  .introduction {
+    margin-left: 3rem !important;    /* less than desktop, more than phone */
+    margin-right: 3rem !important;
+    padding: 0;
+  }
+
+  .title {
+    font-size: 3rem;      /* slightly smaller than desktop */
+  }
+
+  .subtitle {
+    font-size: 1.2rem;
+  }
+
+  .projects {
+    flex-direction: row;  /* keep projects side by side */
+    margin-left: 3rem;
+    margin-right: 3rem;
+    gap: 5rem;            /* smaller than desktop 15rem */
+  }
+
+  .coding-projects,
+  .music-projects {
+    width: 40%;            /* roughly half the row each */
+    gap: 1rem;             /* slightly smaller gap */
+  }
+}

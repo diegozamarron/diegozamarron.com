@@ -1,0 +1,48 @@
+/* index.css */
+:root {
+  --bg: #0F1115;
+  --surface: #161A22;
+  --text: #E6EAF2;
+  --text-muted: #9AA4B2;
+  --text-hover: #BCC5D1;
+  --accent-warm: #C89B3C;
+  --accent-cool: #5DA9E9;
+}
+
+/* 1. Make sizing predictable */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* 2. Remove default browser spacing */
+html{
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 
+               "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg);
+  color: #111;
+  background-image: url('./assets/background.png');
+  background-size: 100vh 100vh;
+  background-position: top center;
+  background-repeat: repeat;
+  overflow-x: hidden;
+}h1 {
+  color:var(--text);
+  font-size: 4rem;
+}
+
+
+p {
+  color:var(--text-muted);
+}
+
+/* 3. Make root fill the screen */
+#root {
+  min-height: 100vh;;
+}
