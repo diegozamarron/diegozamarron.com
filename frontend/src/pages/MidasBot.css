@@ -1,0 +1,239 @@
+.midas-intro {
+  margin-top: 5rem;
+  margin-left: 15rem;
+}
+
+.midas-wrap {
+  margin-left: 15rem;
+  margin-right: 4rem;
+  margin-top: 2rem;
+  padding-bottom: 3rem;
+}
+
+.midas-grid {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.midas-grid.four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.midas-grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.midas-card {
+  background-color: var(--surface);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.midas-card h3 {
+  margin: 0 0 0.75rem 0;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.midas-value {
+  color: var(--text);
+  font-size: 1.6rem;
+  margin: 0;
+  font-weight: 700;
+}
+
+.midas-value.small {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.midas-info {
+  margin: 0.4rem 0;
+  color: var(--text-muted);
+}
+
+.midas-error {
+  color: #ff8a8a;
+  margin: 0.4rem 0;
+}
+
+.pick-row {
+  display: grid;
+  grid-template-columns: 6rem 1fr 1fr 1fr;
+  color: var(--text-muted);
+  padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.pick-row:last-child {
+  border-bottom: 0;
+}
+
+.pick-label {
+  color: var(--text-hover);
+  font-weight: 600;
+}
+
+.midas-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.toggle-group {
+  display: inline-flex;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.toggle-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+}
+
+.toggle-btn.active {
+  background: var(--accent-cool);
+  color: #0b1018;
+  font-weight: 600;
+}
+
+.metric-line {
+  margin: 0.25rem 0 0.75rem 0;
+  color: var(--text-muted);
+}
+
+.metric-line strong {
+  color: var(--text-hover);
+}
+
+.chart-shell,
+.tree-shell {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.midas-chart {
+  width: 100%;
+  min-width: 520px;
+  height: 230px;
+}
+
+.axis {
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-width: 1;
+}
+
+.chart-line {
+  fill: none;
+  stroke: var(--accent-cool);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.midas-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 460px;
+}
+
+.midas-table th,
+.midas-table td {
+  text-align: left;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  padding: 0.45rem 0.3rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.midas-table th {
+  color: var(--text-hover);
+  font-weight: 600;
+}
+
+.tree-card {
+  margin-bottom: 1rem;
+}
+
+.midas-tree {
+  width: 100%;
+  min-width: 760px;
+  height: 340px;
+}
+
+.tree-edge {
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-width: 1.5;
+}
+
+.tree-node {
+  fill: rgba(93, 169, 233, 0.18);
+  stroke: var(--accent-cool);
+  stroke-width: 1.5;
+}
+
+.tree-label-top,
+.tree-label-bottom {
+  fill: var(--text);
+  font-size: 10px;
+  pointer-events: none;
+}
+
+.tree-label-bottom {
+  fill: var(--text-muted);
+}
+
+@media (max-width: 767px) {
+  .midas-intro {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+
+  .midas-wrap {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+
+  .midas-grid.four,
+  .midas-grid.two {
+    grid-template-columns: 1fr;
+  }
+
+  .pick-row {
+    grid-template-columns: 5.5rem 1fr 1fr;
+    gap: 0.35rem;
+  }
+
+  .pick-row span:last-child {
+    grid-column: 2 / span 2;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1366px) {
+  .midas-intro {
+    margin-left: 3rem;
+    margin-right: 3rem;
+  }
+
+  .midas-wrap {
+    margin-left: 3rem;
+    margin-right: 3rem;
+  }
+
+  .midas-grid.four {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
