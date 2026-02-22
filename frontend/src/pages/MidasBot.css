@@ -170,30 +170,41 @@
 
 .midas-tree {
   width: 100%;
-  min-width: 760px;
-  height: 340px;
+  min-width: 980px;
+  height: 420px;
 }
 
 .tree-edge {
-  stroke: rgba(255, 255, 255, 0.18);
-  stroke-width: 1.5;
+  stroke: rgba(255, 255, 255, 0.28);
+  stroke-width: 2;
 }
 
 .tree-node {
-  fill: rgba(93, 169, 233, 0.18);
+  fill: rgba(93, 169, 233, 0.2);
   stroke: var(--accent-cool);
-  stroke-width: 1.5;
+  stroke-width: 1.8;
 }
 
 .tree-label-top,
+.tree-label-mid,
 .tree-label-bottom {
-  fill: var(--text);
-  font-size: 10px;
   pointer-events: none;
+}
+
+.tree-label-top {
+  fill: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tree-label-mid {
+  fill: var(--text-hover);
+  font-size: 10px;
 }
 
 .tree-label-bottom {
   fill: var(--text-muted);
+  font-size: 9px;
 }
 
 @media (max-width: 767px) {

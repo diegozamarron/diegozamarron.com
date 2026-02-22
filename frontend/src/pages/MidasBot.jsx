@@ -132,25 +132,29 @@ function toTreeLayout(rawTree) {
   });
 
   const maxDepth = Math.max(...Array.from(nodeMap.values()).map((n) => n.depth));
-  const width = Math.max(900, orderIds.length * 130);
-  const height = Math.max(320, (maxDepth + 1) * 120);
-  const padX = 70;
-  const padY = 60;
+  const width = Math.max(980, orderIds.length * 180);
+  const height = Math.max(420, (maxDepth + 1) * 150);
+  const padX = 90;
+  const padY = 70;
 
   const nodes = Array.from(nodeMap.values()).map((entry) => {
     const x = padX + ((entry.order + 0.5) / orderIds.length) * (width - padX * 2);
     const y = padY + entry.depth * ((height - padY * 2) / Math.max(1, maxDepth));
 
     const score = toNumber(entry.node.score);
-    const scoreText = score === null ? '--' : score.toFixed(3);
+    const scoreText = score === null ? 'score --' : `score ${score.toFixed(3)}`;
     const ticker = entry.node.ticker || '--';
+    const mentions = Number.isFinite(Number(entry.node.count)) ? Number(entry.node.count) : null;
+    const day = entry.node.day || '--';
+    const metaText = mentions === null ? day : `n=${mentions}  ${day}`;
 
     return {
       id: entry.id,
       x,
       y,
       labelTop: ticker,
-      labelBottom: scoreText,
+      labelMid: scoreText,
+      labelBottom: metaText,
       depth: entry.depth,
     };
   });
@@ -414,11 +418,14 @@ export default function MidasBot() {
                     })}
                     {tree.nodes.map((node) => (
                       <g key={node.id}>
-                        <circle cx={node.x} cy={node.y} r="26" className="tree-node" />
-                        <text x={node.x} y={node.y - 2} textAnchor="middle" className="tree-label-top">
+                        <circle cx={node.x} cy={node.y} r="34" className="tree-node" />
+                        <text x={node.x} y={node.y - 10} textAnchor="middle" className="tree-label-top">
                           {node.labelTop || node.label || node.id}
                         </text>
-                        <text x={node.x} y={node.y + 12} textAnchor="middle" className="tree-label-bottom">
+                        <text x={node.x} y={node.y + 4} textAnchor="middle" className="tree-label-mid">
+                          {node.labelMid || ''}
+                        </text>
+                        <text x={node.x} y={node.y + 18} textAnchor="middle" className="tree-label-bottom">
                           {node.labelBottom || ''}
                         </text>
                       </g>
