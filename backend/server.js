@@ -22,8 +22,7 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || "https://diegozamarron.co
   .filter(Boolean);
 
 app.use((req, _res, next) => {
-  const started = Date.now();
-  req._startedAt = started;
+  req._startedAt = Date.now();
   console.log(`[REQ] ${req.method} ${req.path}`);
   next();
 });
@@ -114,14 +113,34 @@ async function fetchJson(url) {
   return res.json();
 }
 
+function normalizePick(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const ticker = raw.ticker || raw.symbol || null;
+  const mean = Number(raw.mean ?? raw.score ?? raw.meanSentimentScore);
+  const mentions = Number(raw.mentions ?? raw.count ?? raw.n);
+  return {
+    ticker,
+    mean: Number.isFinite(mean) ? mean : null,
+    mentions: Number.isFinite(mentions) ? mentions : null,
+  };
+}
+
 async function getPicksAndTree() {
   try {
     const snapshot = await fetchJson(githubDashboardUrl);
+    const picks = snapshot.latest_picks || null;
     return {
       source: "github_snapshot_json",
-      picks: snapshot.latest_picks || null,
+      picks: picks
+        ? {
+            buy: normalizePick(picks.buy ?? picks.best ?? picks.long),
+            sell: normalizePick(picks.sell ?? picks.worst ?? picks.short),
+            best: normalizePick(picks.best ?? picks.buy ?? picks.long),
+            worst: normalizePick(picks.worst ?? picks.sell ?? picks.short),
+          }
+        : null,
       tree: snapshot.persistent_tree || null,
-      sentimentRows: snapshot.sentiment_rows || [],
+      sentimentRows: Array.isArray(snapshot.sentiment_rows) ? snapshot.sentiment_rows : [],
       asOf: snapshot.as_of || null,
       warning: null,
     };
@@ -166,6 +185,10 @@ function unwrapSettled(result, key) {
   }
   return { value: null, error: `${key}: ${result.reason?.message || "failed"}` };
 }
+
+app.get("/", (_req, res) => {
+  res.json({ ok: true, service: "midas-api", endpoints: ["/health", "/api/dashboard"] });
+});
 
 app.get("/health", (_req, res) => {
   res.json({ ok: true, service: "midas-api" });
@@ -277,6 +300,7 @@ app.get("/api/dashboard", async (_req, res) => {
 
   const warnings = [accountR.error, positionsR.error, activityR.error, historyR.error, picksR.error]
     .filter(Boolean);
+  if (picksR.value?.warning) warnings.push(picksR.value.warning);
 
   res.json({
     asOf: new Date().toISOString(),
